@@ -16,15 +16,15 @@ def get_gpt_response(user_input):
     }
     response = client.chat.completions.create(
         messages = [message],
-        model = "gpt-3.5-turbo",
+        model = "gpt-4o",
     )
     return response.choices[0].message.content
 
 def chat():
     while True:
         user_input = input("You: ")
-        if user_input.lower() in ['exit', 'quit', 'bye', 'fuck off']:
-            print("Fuck off then.")
+        if user_input.lower() in ['exit', 'quit', 'bye']:
+            print("Bye.")
             break
         response = get_gpt_response(user_input)
         print(f"Chatbot: {response}")
