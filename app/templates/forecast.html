@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecasting</title>
+</head>
+<body>
+    <h1>Forecasting</h1>
+    <form action="/forecast" method="post" enctype="multipart/form-data">
+        <label for="datafile">Upload Time Series Data (CSV):</label>
+        <input type="file" id="datafile" name="datafile" required>
+        <button type="submit">Submit</button>
+    </form>
+    {% if forecast %}
+    <h2>Forecast Results:</h2>
+    <p>{{ forecast }}</p>
+    {% endif %}
+</body>
+</html>
