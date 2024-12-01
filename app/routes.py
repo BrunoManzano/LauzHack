@@ -1,13 +1,16 @@
+from .models.Preprocessing import preprocessing
 from flask import Blueprint, render_template
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
-def static_study():
-    # Render the static study template
-    return render_template('static_study.html')
+def index():
+    return render_template('index.html')
 
-@main.route('/forecast')
-def forecast():
-    # Render the forecasting template
-    return render_template('forecast.html')
+# @main.route('/model')
+# def model():
+#     return render_template('model.html')
+
+# @main.route('/explainability')
+# def explainability():
+#     return render_template('explainability.html')

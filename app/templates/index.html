@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Initial Page</title>
+    <style>
+        /* Hover effect for the button */
+        /* Add text above the image container */
+        .top-nav-item-button-mobile-v2::before {
+            content: 'Your Text Here'; /* Replace with your desired text */
+            position: absolute;
+            top: 17opx; /* Position the text above the button */
+            left: 500px; /* Center the text horizontally */
+            transform: translateX(-50%); /* Center it precisely */
+            font-size: 18px; /* Adjust the font size */
+            font-weight: bold;
+            color: black; /* Text color */
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.3s ease; /* Smooth transition */
+            visibility: hidden;
+            z-index: 3; /* Ensure the text is above the image */
+        }
+
+        /* Show the text when hovering */
+        .top-nav-item-button-mobile-v2:hover::before {
+            opacity: 1; /* Make the text visible */
+            visibility: visible; /* Ensure it's shown */
+            transition: opacity 0.3s ease, visibility 0s 0s ease; /* Smooth transition */
+        }
+        .top-nav-item-button-mobile-v2 {
+            position: fixed; /* Stays in place during scrolling */
+            top: 35px; /* Distance from the top */
+            right: 195px; /* Distance from the right */
+            margin-top: 12px;
+            padding: 19px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: flex-start; /* Align text closer to the top */
+            justify-content: center; /* Center horizontally */
+            background-color: transparent; /* No background initially */
+            border: none; /* Remove border */
+            transition: background-color 0.3s ease, height 0.3s ease; /* Smooth transition for hover effect */
+            font-family: "YAFdJvSyp_k 2", _fb_, auto; /* Apply the specified font */
+            font-weight: bold; /* Make the font bold */
+            color: white; /* Default text color */
+        }
+
+        .top-nav-item-button-mobile-v2:hover {
+            background-color: #be2bbb; /* Background color when hovering */
+            color: white; /* Keep text color white */
+        }
+        .top-nav-item-button-mobile-v2::after {
+            content: ''; /* Create the container */
+            position: absolute;
+            top: 40px; /* Position it below the button */
+            transform: translateX(-50%); /* Center it using translate */
+            width: 900px; /* Width of the image container */
+            height: 300px; /* Height of the image container */
+            background-image: url('{{ url_for('static', filename='hover.png') }}'); /* Set the image path */
+            background-size: cover; /* Ensure the image covers the container */
+            background-position: center; /* Center the image */
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+            z-index: 2 /* Ensure it appears above other elements */
+        }
+        .top-nav-item-button-mobile-v2:hover::after {
+            opacity: 1; /* Make the rectangle visible */
+            transform: translate(-50%, 20px); /* Slide down slightly on hover */
+        }
+        .nav-item-text {
+            margin-right: 10px;
+        }
+        .icon-svg {
+            width: 16px;
+            height: 16px;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body style="background: url('{{ url_for('static', filename='background.png') }}') no-repeat center center fixed; background-size: cover; color: white; margin: 0;">
+    <div class="container">
+        <button type="button" class="top-nav-item top-nav-item-button-mobile-v2" aria-expanded="false">
+            <span class="nav-item-text">Forecasting</span>
+            <span class="top-nav-item-button-inner">
+                <i class="icon icon-page-right">
+                    <svg class="icon-svg" viewBox="0 0 30 50">
+                        <path d="M28.45,23.48,4.43,1.59a2,2,0,0,0-2.86,0,2,2,0,0,0,0,2.84L24.14,25,1.57,45.57a2,2,0,0,0,0,2.84,2,2,0,0,0,2.86,0l24-21.89a2.31,2.31,0,0,0,0-3Z" fill="white"></path>
+                    </svg>
+                </i>
+            </span>
+        </button>
+    </div>
+</body>
+</html>
