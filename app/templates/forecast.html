@@ -4,36 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forecasting</title>
+    <style>
+        body {
+            background: url('{{ url_for('static', filename='Predictor_bg.png') }}') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            margin: 0;
+        }
+        .content-container {
+            margin-top: 150px; /* Ensures all content starts below 220px */
+            padding: 40px;
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-bottom: 30px;  /* Add space above the chat container */
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;  /* Push the input bar to the bottom */
+            height: 490px;  /* Set the height of the entire chat container */
+            margin-bottom: 10px;  /* Adjust the bottom margin if needed */
+            margin-right: 20px;
+            margin-top: 100px;  /* Added margin-top to push the entire chat container down */
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1px;
+            color: #5a5a5a;
+            white-space: pre-wrap;
+            min-height: 200px;  /* Ensure there's enough space for messages */
+            padding-right: 10px;  /* Add padding to the right to prevent text from touching the border */
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 3px;
+            margin-top: 10px;  /* Adjust the space above the input */
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #be2bbb;
+            border-radius: 10px;
+            color: #5a5a5a;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .chat-input button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            background-color: #be2bbb;
+            color: white;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .chat-input button:hover {
+            background-color: #a327a5;
+        }
+        .chat-container div {
+            margin-bottom: 5px;  /* Reduce space between messages */
+        }
+
+        /* Add a style for the error message */
+        .error-message {
+            color: grey;  /* Set text color to grey */
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Forecasting</h1>
-    <form action="/forecast" method="post" enctype="multipart/form-data">
-        <label for="datafile">Upload Time Series Data (CSV):</label>
-        <input type="file" id="datafile" name="datafile" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="content-container">
+        {% if forecast %}
+        <h2>Forecast Results:</h2>
+        <p>{{ forecast }}</p>
+        {% elif forecast == "Error loading dataset." %}
+        <h2 class="error-message">Forecast Results:</h2>
+        <p class="error-message">{{ forecast }}</p>
+        {% endif %}
+        <div class="chat-container">
+            <!-- Chat messages -->
+            <div class="chat-messages" id="chatMessages">
+                {% for message in conversation_history %}
+                    {% if message.user_message and message.chatbot_response %}
+                        <div>
+                            <h3>Your Message:</h3>
+                            <p>{{ message.user_message }}</p>
+                        </div>
+                        <div>
+                            <h3>Chatbot Response:</h3>
+                            <div>{{ message.chatbot_response | safe }}</div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
 
-    {% if forecast %}
-    <h2>Forecast Results:</h2>
-    <p>{{ forecast }}</p>
-    {% endif %}
-
-    <!-- Chat-like user input section -->
-    <h2>Chat with us</h2>
-    <form action="/forecast" method="post">
-        <label for="user_input">Your Message:</label>
-        <input type="text" id="user_input" name="user_input" required placeholder="Type your message here...">
-        <button type="submit">Send</button>
-    </form>
-
-    {% if user_message %}
-    <h3>Your Message:</h3>
-    <p>{{ user_message }}</p>
-    {% endif %}
-
-    {% if chatbot_response %}
-    <h3>Chatbot Response:</h3>
-    <p>{{ chatbot_response }}</p>
-    {% endif %}
+            <!-- Chat input -->
+            <div class="chat-input">
+                <form action="/forecast" method="post" style="display: flex; width: 100%;">
+                    <input type="text" id="user_input" name="user_input" required placeholder="Type your message here...">
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Scroll the chat messages to the bottom whenever the page loads or a new message is added
+        window.onload = function() {
+            var chatMessages = document.getElementById("chatMessages");
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+    </script>
 </body>
 </html>
