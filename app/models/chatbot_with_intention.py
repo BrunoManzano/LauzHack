@@ -72,20 +72,26 @@ shap_values = {
 # Function to pass predictions and SHAP values to the model internally
 def update_conversation_with_results(predictions, shap_values):
     global conversation_history
-    
-    # Adding the model's predictions and SHAP values to the conversation
     conversation_history.append({"role": "system", "content": f"Model Predictions: {predictions}"})
     conversation_history.append({"role": "system", "content": f"SHAP Values: {shap_values}"})
+
 
 # Function to change MonthlyTreatment by percentage
 def change_monthly_treatment_by_percentage(percentage_change):
     global predictions
+    if percentage_change > 0:
+        print(f"MonthlyTreatment increased by {percentage_change}%.")
+    elif percentage_change < 0:
+        print(f"MonthlyTreatment decreased by {percentage_change}%.")
+    else:
+        print("MonthlyTreatment remains unchanged.")
     original_monthly_treatment = predictions.get("MonthlyTreatment", 0)
     change_amount = original_monthly_treatment * (percentage_change / 100)
     new_monthly_treatment = original_monthly_treatment + change_amount
-    predictions["MonthlyTreatment"] = new_monthly_treatment
-    # Update predictions (simulating the model prediction after the change)
-    # update_conversation_with_results(predictions, shap_values)
+    # Update the dataset with the new MonthlyTreatment value and call the model to get updated predictions
+    # dataset["MonthlyTreatment"] = new_monthly_treatment
+    
+
 
 import spacy
 
@@ -99,6 +105,9 @@ def get_gpt_response(user_input):
 
     # Add user input to conversation history
     conversation_history.append({"role": "user", "content": user_input})
+
+    # Update the conversation history with the latest predictions and SHAP values
+    update_conversation_with_results(predictions, shap_values)
 
     # Call the API with the full conversation history
     response = client.chat.completions.create(
@@ -126,49 +135,11 @@ def handle_user_input(user_input):
     monthly_treatment_decrease = response.get("MonthlyTreatmentDecrease", 0)
 
     if monthly_treatment_increase:
-        print(f"MonthlyTreatment increased by {monthly_treatment_increase}%.")
+        change_monthly_treatment_by_percentage(monthly_treatment_increase)
     
     if monthly_treatment_decrease:
         print(f"MonthlyTreatment decreased by {monthly_treatment_decrease}%.")
     return content
-
-
-    # Initialize response structure
-    # response = {
-    #     "content": "",  # Placeholder for chatbot response
-    #     "MonthlyTreatmentIncrease": 0,
-    #     "MonthlyTreatmentDecrease": 0,
-    # }
-
-    # # Preprocess the input
-    # processed_text = user_input.lower()
-
-    # # Patterns for detecting increase and decrease
-    # increase_pattern = r"(increase|raise|boost)\s+monthly\s+treatment\s+by\s+(\d+\.?\d*)%"
-    # decrease_pattern = r"(decrease|lower|reduce)\s+monthly\s+treatment\s+by\s+(\d+\.?\d*)%"
-
-    # # Test for increase
-    # increase_match = re.search(increase_pattern, processed_text, re.IGNORECASE)
-    # if increase_match:
-    #     percentage_change = float(increase_match.group(2))
-    #     change_monthly_treatment_by_percentage(percentage_change)
-    #     response["content"] = f"MonthlyTreatment increased by {percentage_change}%. Updated value: {predictions['MonthlyTreatment']}."
-    #     response["MonthlyTreatmentIncrease"] = percentage_change
-    #     return json.dumps(response)
-
-    # # Test for decrease
-    # decrease_match = re.search(decrease_pattern, processed_text, re.IGNORECASE)
-    # if decrease_match:
-    #     percentage_change = float(decrease_match.group(2))
-    #     change_monthly_treatment_by_percentage(-percentage_change)  # Negative for decrease
-    #     response["content"] = f"MonthlyTreatment decreased by {percentage_change}%. Updated value: {predictions['MonthlyTreatment']}."
-    #     response["MonthlyTreatmentDecrease"] = percentage_change
-    #     return json.dumps(response)
-
-    # If no intent is detected, fallback to GPT response
-    gpt_response = get_gpt_response(user_input)
-    response["content"] = gpt_response
-    return json.dumps(response)
 
 
 
