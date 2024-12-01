@@ -6,6 +6,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Initial Page</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function() {
+                window.location.href = '{{ url_for("main.model") }}'; // Use Flask's url_for to navigate to the /forecast route
+            });
+        });
+    </script>
     <style>
         /* Hover effect for the button */
         /* Add text above the image container */

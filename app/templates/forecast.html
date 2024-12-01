@@ -12,9 +12,28 @@
         <input type="file" id="datafile" name="datafile" required>
         <button type="submit">Submit</button>
     </form>
+
     {% if forecast %}
     <h2>Forecast Results:</h2>
     <p>{{ forecast }}</p>
+    {% endif %}
+
+    <!-- Chat-like user input section -->
+    <h2>Chat with us</h2>
+    <form action="/forecast" method="post">
+        <label for="user_input">Your Message:</label>
+        <input type="text" id="user_input" name="user_input" required placeholder="Type your message here...">
+        <button type="submit">Send</button>
+    </form>
+
+    {% if user_message %}
+    <h3>Your Message:</h3>
+    <p>{{ user_message }}</p>
+    {% endif %}
+
+    {% if chatbot_response %}
+    <h3>Chatbot Response:</h3>
+    <p>{{ chatbot_response }}</p>
     {% endif %}
 </body>
 </html>
