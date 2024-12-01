@@ -1,10 +1,8 @@
-import re
-from matplotlib.font_manager import json_dump
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
+import json
 
 # Load environment variables
 load_dotenv()
@@ -17,7 +15,7 @@ conversation_history = [
     {
         "role": "system",
         "content": (
-            "Return ALWAYS a json with the keys content, MonthlyTreatmentIncrease and MonthlyTreatmentDecrease. The last two keys are the percentage that the user wants to increase or decrease the MonthlyTreatment. If the user does not want to increase or decrease the MonthlyTreatment, the value of the key must be 0.\n\n"
+            "Return ALWAYS A JSON with the keys content, MonthlyTreatmentIncrease and MonthlyTreatmentDecrease. The last two keys are the percentage that the user wants to increase or decrease the MonthlyTreatment. If the user does not want to increase or decrease the MonthlyTreatment, the value of the key must be 0.\n\n"
             "You are an expert in machine learning explainability and pharmaceutical market analytics. You specialize in interpreting "
             "SHAP values and analyzing results from LSTM models trained on complex datasets. Your goal is to: "
             "1. Interpret SHAP values to explain which features had the most impact on the LSTM model's predictions. "
@@ -123,7 +121,6 @@ def get_gpt_response(user_input):
 
     return assistant_message
 
-import json
 
 def handle_user_input(user_input):
     global predictions
