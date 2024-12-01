@@ -1,6 +1,10 @@
+import re
+from matplotlib.font_manager import json_dump
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +17,7 @@ conversation_history = [
     {
         "role": "system",
         "content": (
+            "Return ALWAYS a json with the keys content, MonthlyTreatmentIncrease and MonthlyTreatmentDecrease. The last two keys are the percentage that the user wants to increase or decrease the MonthlyTreatment. If the user does not want to increase or decrease the MonthlyTreatment, the value of the key must be 0.\n\n"
             "You are an expert in machine learning explainability and pharmaceutical market analytics. You specialize in interpreting "
             "SHAP values and analyzing results from LSTM models trained on complex datasets. Your goal is to: "
             "1. Interpret SHAP values to explain which features had the most impact on the LSTM model's predictions. "
@@ -44,9 +49,25 @@ conversation_history = [
             "2. Relate SHAP value insights to pharmaceutical business strategies, such as optimizing promotional efforts or adjusting forecasts.\n"
             "3. Provide actionable recommendations, such as targeting specific indications, enhancing forecasting accuracy, or addressing competition with YREX.\n\n"
             "You have access to the predictions and SHAP values throughout the session. Whenever you need to refer to them, you will be provided with updated values as context."
+            "### Specific actions:\n"
+            "If the user asks to increase or decrease the MonthlyTreatment, in the json format the keys MonthlyTreatmentIncrease and its value as the percentage the user wants to change, and MonthlyTreatmentDecrease with the percentage the user wants to change (obviously one of the two values will be 0)."
         )
     }
 ]
+
+# Example results from your LSTM model
+predictions = {
+    "Date": "2020-08-01", 
+    "Predicted_Value": 3700000,
+    "Product": "INNOVIX",
+    "Country": "Floresland",
+    "MonthlyTreatment": 1000000
+}
+shap_values = {
+    "MonthlyTreatment": 0.35,
+    "YrexMonthlyTreatment": -0.20,
+    "PatientsDescribed": 0.50
+}
 
 # Function to pass predictions and SHAP values to the model internally
 def update_conversation_with_results(predictions, shap_values):
@@ -56,22 +77,21 @@ def update_conversation_with_results(predictions, shap_values):
     conversation_history.append({"role": "system", "content": f"Model Predictions: {predictions}"})
     conversation_history.append({"role": "system", "content": f"SHAP Values: {shap_values}"})
 
-# Example of how to use it
-# Let's assume you have the following results from your LSTM model
-predictions = {
-    "Date": "2020-08-01", 
-    "Predicted_Value": 3700000,
-    "Product": "INNOVIX",
-    "Country": "Floresland"
-}
-shap_values = {
-    "MonthlyTreatment": 0.35,
-    "YrexMonthlyTreatment": -0.20,
-    "PatientsDescribed": 0.50
-}
+# Function to change MonthlyTreatment by percentage
+def change_monthly_treatment_by_percentage(percentage_change):
+    global predictions
+    original_monthly_treatment = predictions.get("MonthlyTreatment", 0)
+    change_amount = original_monthly_treatment * (percentage_change / 100)
+    new_monthly_treatment = original_monthly_treatment + change_amount
+    predictions["MonthlyTreatment"] = new_monthly_treatment
+    # Update predictions (simulating the model prediction after the change)
+    # update_conversation_with_results(predictions, shap_values)
 
-# Update the conversation with predictions and SHAP values
-update_conversation_with_results(predictions, shap_values)
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
+
+stemmer = PorterStemmer()
 
 # Function to get a response from the chatbot
 def get_gpt_response(user_input):
@@ -94,15 +114,75 @@ def get_gpt_response(user_input):
 
     return assistant_message
 
+import json
+
+def handle_user_input(user_input):
+    global predictions
+
+    # Parse the json response of content, MonthlyTreatmentIncrease and MonthlyTreatmentDecrease
+    response = json.loads(get_gpt_response(user_input))
+    content = response.get("content", "")
+    monthly_treatment_increase = response.get("MonthlyTreatmentIncrease", 0)
+    monthly_treatment_decrease = response.get("MonthlyTreatmentDecrease", 0)
+
+    if monthly_treatment_increase:
+        print(f"MonthlyTreatment increased by {monthly_treatment_increase}%.")
+    
+    if monthly_treatment_decrease:
+        print(f"MonthlyTreatment decreased by {monthly_treatment_decrease}%.")
+    return content
+
+
+    # Initialize response structure
+    # response = {
+    #     "content": "",  # Placeholder for chatbot response
+    #     "MonthlyTreatmentIncrease": 0,
+    #     "MonthlyTreatmentDecrease": 0,
+    # }
+
+    # # Preprocess the input
+    # processed_text = user_input.lower()
+
+    # # Patterns for detecting increase and decrease
+    # increase_pattern = r"(increase|raise|boost)\s+monthly\s+treatment\s+by\s+(\d+\.?\d*)%"
+    # decrease_pattern = r"(decrease|lower|reduce)\s+monthly\s+treatment\s+by\s+(\d+\.?\d*)%"
+
+    # # Test for increase
+    # increase_match = re.search(increase_pattern, processed_text, re.IGNORECASE)
+    # if increase_match:
+    #     percentage_change = float(increase_match.group(2))
+    #     change_monthly_treatment_by_percentage(percentage_change)
+    #     response["content"] = f"MonthlyTreatment increased by {percentage_change}%. Updated value: {predictions['MonthlyTreatment']}."
+    #     response["MonthlyTreatmentIncrease"] = percentage_change
+    #     return json.dumps(response)
+
+    # # Test for decrease
+    # decrease_match = re.search(decrease_pattern, processed_text, re.IGNORECASE)
+    # if decrease_match:
+    #     percentage_change = float(decrease_match.group(2))
+    #     change_monthly_treatment_by_percentage(-percentage_change)  # Negative for decrease
+    #     response["content"] = f"MonthlyTreatment decreased by {percentage_change}%. Updated value: {predictions['MonthlyTreatment']}."
+    #     response["MonthlyTreatmentDecrease"] = percentage_change
+    #     return json.dumps(response)
+
+    # If no intent is detected, fallback to GPT response
+    gpt_response = get_gpt_response(user_input)
+    response["content"] = gpt_response
+    return json.dumps(response)
+
+
+
 def chat():
-    print("Chatbot initialized! Type 'exit' to quit.")
+    # Output initial chatbot message
+    print(json.loads(get_gpt_response("Hello!")).get("content", ""))
     while True:
         user_input = input("You: ")
         if user_input.lower() in ['exit', 'quit', 'bye']:
             print("See you soon!")
             break
-        response = get_gpt_response(user_input)
-        print(f"Chatbot: {response}")
+        response = handle_user_input(user_input)
+        # print the content of the json that is returned
+        print(response)
 
 if __name__ == "__main__":
     chat()
